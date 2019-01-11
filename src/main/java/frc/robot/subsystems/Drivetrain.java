@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.command.Subsystem;
@@ -9,10 +11,12 @@ import frc.robot.HardwareMap;
 
 public class Drivetrain extends Subsystem {
 
+    private final AHRS gyro;
     private final DifferentialDrive drive;
 
     public Drivetrain(){
         drive = createDrivetrain();
+        gyro = new AHRS(SPI.Port.kMXP);
 
         SmartDashboard.putData("Drive", drive);
     }
@@ -31,6 +35,13 @@ public class Drivetrain extends Subsystem {
 
     public void update() {
         drive.stopMotor();
+
+        SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
+
+    }
+
+    public double getHeading(){
+        return gyro.getAngle();
     }
 
     public void drive(double left, double right){
