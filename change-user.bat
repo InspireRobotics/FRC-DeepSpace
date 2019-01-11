@@ -10,7 +10,7 @@ set person=%1
 
 :colin
 @echo Setting user to 'colin' 
-@git config user.name "Colin Voorhis"
+@git config user.name "21cvoorhis"
 @git config user.email "21cvoorhis@gmail.com"
 @goto :finish
 
@@ -25,7 +25,9 @@ set person=%1
 @goto :finish
 
 :aidan
-@echo Setup a github account!
+@echo Setting user to 'aidan'
+@git config user.name "Dat-Guy"
+@git config user.email "samurott2004@gmail.com"
 @goto :finish
 
 :finish
