@@ -4,38 +4,55 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.TurnCommand;
 
 public class Robot extends TimedRobot {
 
-  private Drivetrain drivetrain;
+    private Drivetrain drivetrain;
 
-  @Override
-  public void robotInit() {
-      System.out.println("Robot init!");
+    @Override
+    public void robotInit() {
+        System.out.println("Robot init!");
 
-      drivetrain = new Drivetrain();
-    SmartDashboard.putData("Drivetrain", drivetrain);
-  }
+        drivetrain = new Drivetrain();
+        drivetrain.updateDashboard();
 
-  @Override
-  public void disabledInit() {
-    System.out.println("Robot disabled!");
-  }
+        SmartDashboard.putData("Drivetrain", drivetrain);
+    }
 
-  @Override
-  public void autonomousInit() {
-    System.out.println("Running Auto!");
-  }
+    @Override
+    public void disabledInit() {
+        System.out.println("Robot disabled!");
+    }
 
-  @Override
-  public void teleopInit() {
-    System.out.println("Running teleop!");
-  }
+    @Override
+    public void disabledPeriodic() {
+        drivetrain.updateDashboard();
+    }
 
-  @Override
-  public void teleopPeriodic() {
-    drivetrain.update();
+    @Override
+    public void autonomousInit() {
+        System.out.println("Running Auto!");
 
-    Scheduler.getInstance().run();
-  }
+        Scheduler.getInstance().removeAll();
+        Scheduler.getInstance().add(new TurnCommand(drivetrain, 90));
+    }
+
+    @Override
+    public void autonomousPeriodic() {
+        drivetrain.updateDashboard();
+        Scheduler.getInstance().run();
+    }
+
+    @Override
+    public void teleopInit() {
+        System.out.println("Running teleop!");
+    }
+
+    @Override
+    public void teleopPeriodic() {
+        drivetrain.updateDashboard();
+
+        Scheduler.getInstance().run();
+    }
 }

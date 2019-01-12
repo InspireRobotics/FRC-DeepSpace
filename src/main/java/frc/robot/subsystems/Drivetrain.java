@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
@@ -14,9 +15,13 @@ public class Drivetrain extends Subsystem {
     private final AHRS gyro;
     private final DifferentialDrive drive;
 
-    public Drivetrain(){
+    public Drivetrain() {
         drive = createDrivetrain();
-        gyro = new AHRS(SPI.Port.kMXP);
+        drive.setSafetyEnabled(false);
+        gyro = new AHRS(I2C.Port.kMXP);
+        gyro.enableLogging(true);
+
+        gyro.reset();
 
         SmartDashboard.putData("Drive", drive);
     }
@@ -33,18 +38,23 @@ public class Drivetrain extends Subsystem {
         return new DifferentialDrive(left, right);
     }
 
-    public void update() {
-        drive.stopMotor();
-
-        SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
-
+    public void updateDashboard() {
+        SmartDashboard.putNumber("Gyro", getHeading());
     }
 
-    public double getHeading(){
+    public double getHeading() {
         return gyro.getAngle();
     }
 
-    public void drive(double left, double right){
+    public void drive(double left, double right) {
+        if (Math.abs(left) < .2) {
+            left = 0;
+        }
+
+        if (Math.abs(right) < .2) {
+            right = 0;
+        }
+
         drive.tankDrive(left, right);
     }
 
