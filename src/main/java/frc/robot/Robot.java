@@ -3,12 +3,16 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.hardware.HardwareThread;
+import frc.robot.hardware.PixyCam;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.TurnCommand;
 
 public class Robot extends TimedRobot {
 
+    private Thread hardwareThread;
     private Drivetrain drivetrain;
+    private PixyCam pixyCam;
 
     @Override
     public void robotInit() {
@@ -18,6 +22,17 @@ public class Robot extends TimedRobot {
         drivetrain.updateDashboard();
 
         SmartDashboard.putData("Drivetrain", drivetrain);
+        pixyCam = new PixyCam();
+
+        hardwareThread = HardwareThread.create(this);
+    }
+
+    @Override
+    public void robotPeriodic() {
+        pixyCam.updateDashboard();
+        drivetrain.updateDashboard();
+
+        SmartDashboard.putBoolean("Hardware Thread", hardwareThread.isAlive());
     }
 
     @Override
@@ -27,7 +42,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledPeriodic() {
-        drivetrain.updateDashboard();
+
     }
 
     @Override
@@ -40,7 +55,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousPeriodic() {
-        drivetrain.updateDashboard();
         Scheduler.getInstance().run();
     }
 
@@ -51,8 +65,19 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
-        drivetrain.updateDashboard();
-
         Scheduler.getInstance().run();
+    }
+
+    @Override
+    public void testInit() {
+
+    }
+
+    public Drivetrain getDrivetrain() {
+        return drivetrain;
+    }
+
+    public PixyCam getPixyCam() {
+        return pixyCam;
     }
 }

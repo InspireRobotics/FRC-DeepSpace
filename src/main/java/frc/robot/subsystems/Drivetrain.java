@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.I2C;
-import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.command.Subsystem;
@@ -17,6 +16,7 @@ public class Drivetrain extends Subsystem {
 
     public Drivetrain() {
         drive = createDrivetrain();
+        drive.setMaxOutput(0);
         drive.setSafetyEnabled(false);
         gyro = new AHRS(I2C.Port.kMXP);
         gyro.enableLogging(true);

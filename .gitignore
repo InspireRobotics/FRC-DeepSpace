@@ -165,6 +165,9 @@ bin/
 
 # User-specific stuff
 .idea
+*.iml
+out/
+build/
 .idea/**/workspace.xml
 .idea/**/tasks.xml
 .idea/**/usage.statistics.xml
