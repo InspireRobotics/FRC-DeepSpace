@@ -12,7 +12,7 @@ import java.util.Optional;
 public class PixyCam {
 
     private static final int PIXY_START_WORD = 0xaa55;
-    private static final int PIXY_START_WORD_CC = 0xaa56;
+    private static final int PIXY_START_WORD_X = 0x55aa;
     private I2C io = new I2C(I2C.Port.kOnboard, 0);
 
     private int[] tempFrameData = new int[6];
@@ -30,20 +30,26 @@ public class PixyCam {
         ArrayList<Shape> temp = new ArrayList<>();
         tempFrameData = new int[6];
         tempFrameData[0] = 0x01;
-        while (syncByteNotPresent() && notNull()) {
-            tempFrameData[0] = readWord();
+        tempFrameData[1] = 0x01;
 
+        long startTime = System.currentTimeMillis();
+        while (synced() && syncByteNotPresent() && (System.currentTimeMillis() - startTime) < 50){
+            tempFrameData[0] = readWord();
+            tempFrameData[1] = readWord();
             if (syncByteNotPresent() && notNull()) {
                 readShape().ifPresent(temp::add);
             }
+        }
+        if (!synced()){
+            io.read(HardwareMap.Sensors.PIXY_CAM, 1, ByteBuffer.allocate(1));
         }
 
         setShapes(temp);
     }
 
     private Optional<Shape> readShape() {
-        int checkSum = 0;
-        for (int i = 1; i < 6; i++) {
+        int checkSum = tempFrameData[1];
+        for (int i = 2; i < 6; i++) {
             tempFrameData[i] = readWord();
             checkSum += tempFrameData[i];
         }
@@ -57,17 +63,21 @@ public class PixyCam {
     }
 
     private boolean syncByteNotPresent() {
-        return !(tempFrameData[0] == PIXY_START_WORD || tempFrameData[0] == PIXY_START_WORD_CC);
+        return !(tempFrameData[0] == PIXY_START_WORD && tempFrameData[1] == PIXY_START_WORD);
     }
 
     private boolean notNull() {
-        return tempFrameData[0] != 0;
+        return !(tempFrameData[0] == 0 && tempFrameData[1] == 0);
     }
-
+    private boolean synced() {
+        return tempFrameData[1] != PIXY_START_WORD_X;
+    }
     public void updateDashboard() {
         SmartDashboard.putNumber("Shape Count", getShapes().size());
-        if (getShapes().size() > 0){
+        try{
             SmartDashboard.putString("First Shape", getShapes().get(0).toString());
+        } catch (Exception e){
+            SmartDashboard.putString("First Shape", "None");
         }
     }
 

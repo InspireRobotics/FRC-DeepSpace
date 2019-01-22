@@ -1,6 +1,8 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class TurnCommand extends Command {
 
@@ -11,6 +13,7 @@ public class TurnCommand extends Command {
     private long startFinishTime;
     private Drivetrain drivetrain;
     private double target;
+    private PowerDistributionPanel pdp = new PowerDistributionPanel();
 
     public TurnCommand(Drivetrain drivetrain, double degrees) {
         this.drivetrain = drivetrain;
@@ -25,9 +28,12 @@ public class TurnCommand extends Command {
             double error = target - drivetrain.getHeading();
 
             double output = error * P_VAL;
-            output += BASE_POWER;
-            output *= Math.signum(error);
-
+            if (output > 0){
+                output += BASE_POWER;
+            } else {
+                output -= BASE_POWER;
+            }
+            SmartDashboard.putNumber("Turn Power", output);
             drivetrain.drive(output, -output);
         }else{
             drivetrain.drive(0,0);

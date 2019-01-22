@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.command.Subsystem;
@@ -13,10 +14,10 @@ public class Drivetrain extends Subsystem {
 
     private final AHRS gyro;
     private final DifferentialDrive drive;
+    private PowerDistributionPanel pdp = new PowerDistributionPanel();
 
     public Drivetrain() {
         drive = createDrivetrain();
-        drive.setMaxOutput(0);
         drive.setSafetyEnabled(false);
         gyro = new AHRS(I2C.Port.kMXP);
         gyro.enableLogging(true);
@@ -54,7 +55,6 @@ public class Drivetrain extends Subsystem {
         if (Math.abs(right) < .2) {
             right = 0;
         }
-
         drive.tankDrive(left, right);
     }
 
