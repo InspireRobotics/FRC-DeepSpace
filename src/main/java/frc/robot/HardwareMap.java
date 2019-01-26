@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
+import frc.robot.subsystems.FeetInches;
 
 public class HardwareMap {
 
@@ -31,6 +32,11 @@ public class HardwareMap {
 
     public static class Sensors{
         public static final int PIXY_CAM = 54;
+    }
+
+    public static class Measurements{
+        public static final FeetInches MARKER_DIST_TARGET = new FeetInches(11.25);
+        public static final FeetInches WHEEL_DIAMETER = new FeetInches(8);
     }
 
 }

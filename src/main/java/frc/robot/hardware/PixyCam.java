@@ -2,12 +2,13 @@ package frc.robot.hardware;
 
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.HardwareMap;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Optional;
+
+import static frc.robot.HardwareMap.Sensors.PIXY_CAM;
 
 public class PixyCam {
 
@@ -17,6 +18,15 @@ public class PixyCam {
 
     private int[] tempFrameData = new int[6];
     private final ArrayList<Shape> shapes = new ArrayList<>();
+    private final ArrayList<Shape> temp = new ArrayList<>();
+    private long nullTimeout;
+    private ArrayList<Integer> dataLog = new ArrayList<>();
+
+    public PixyCam(){
+        for (int i = 0; i < 6; i++){
+            tempFrameData[i] = 0x01;
+        }
+    }
 
     public void setBrightness(int brightness) {
         byte[] writing = new byte[3];
@@ -27,50 +37,50 @@ public class PixyCam {
     }
 
     public void updateFrame() {
-        ArrayList<Shape> temp = new ArrayList<>();
+        dataLog.clear();
+        temp.clear();
+        tempFrameData[0] = readWord();
+        readShape().ifPresent(temp::add);
         tempFrameData = new int[6];
-        tempFrameData[0] = 0x01;
-        tempFrameData[1] = 0x01;
 
-        long startTime = System.currentTimeMillis();
-        while (synced() && syncByteNotPresent() && (System.currentTimeMillis() - startTime) < 50){
+        while ((System.currentTimeMillis() - nullTimeout) < 20 && !(syncWord(tempFrameData[0]) && syncWord(tempFrameData[1]))){
             tempFrameData[0] = readWord();
+            if (syncWord(tempFrameData[0]) && syncWord(tempFrameData[1])){
+                break;
+            }
             tempFrameData[1] = readWord();
-            if (syncByteNotPresent() && notNull()) {
+            if (syncWord(tempFrameData[0]) && !syncWord(tempFrameData[1])) {
+                tempFrameData[0] = tempFrameData[1];
                 readShape().ifPresent(temp::add);
             }
         }
-        if (!synced()){
-            io.read(HardwareMap.Sensors.PIXY_CAM, 1, ByteBuffer.allocate(1));
-        }
-
         setShapes(temp);
     }
 
     private Optional<Shape> readShape() {
-        int checkSum = tempFrameData[1];
-        for (int i = 2; i < 6; i++) {
+        int sum = 0;
+        for (int i = 1; i < 6; i++) {
             tempFrameData[i] = readWord();
-            checkSum += tempFrameData[i];
+            sum += tempFrameData[i];
         }
 
-        if (checkSum == tempFrameData[0]) {
+        if (sum == tempFrameData[0] && notNull(tempFrameData[0])) {
+            nullTimeout = System.currentTimeMillis();
             return Optional.of(new Shape(tempFrameData[1], tempFrameData[2],
                     tempFrameData[3], tempFrameData[4], tempFrameData[5]));
         }
-
         return Optional.empty();
     }
 
-    private boolean syncByteNotPresent() {
-        return !(tempFrameData[0] == PIXY_START_WORD && tempFrameData[1] == PIXY_START_WORD);
+    private boolean syncWord(int word) {
+        return word == PIXY_START_WORD;
     }
 
-    private boolean notNull() {
-        return !(tempFrameData[0] == 0 && tempFrameData[1] == 0);
+    private boolean notNull(int word) {
+        return !(word == 0);
     }
-    private boolean synced() {
-        return tempFrameData[1] != PIXY_START_WORD_X;
+    private boolean synced(int word) {
+        return word != PIXY_START_WORD_X;
     }
     public void updateDashboard() {
         SmartDashboard.putNumber("Shape Count", getShapes().size());
@@ -93,8 +103,12 @@ public class PixyCam {
 
     public int readWord() {
         ByteBuffer buffer = ByteBuffer.allocate(2);
-        boolean abortedWhileReading = io.read(HardwareMap.Sensors.PIXY_CAM, 2, buffer);
+        boolean abortedWhileReading = io.read(PIXY_CAM, 2, buffer);
         if (!abortedWhileReading) {
+            dataLog.add(getUnsignedInt(buffer.array()));
+            if (getUnsignedInt(buffer.array()) > 0){
+                nullTimeout = System.currentTimeMillis();
+            }
             return getUnsignedInt(buffer.array());
         } else {
             return 0;

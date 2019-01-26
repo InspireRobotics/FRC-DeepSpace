@@ -23,7 +23,11 @@ public class HardwareThread implements Runnable {
         int fps = 0;
 
         while(!Thread.interrupted()){
-            cam.updateFrame();
+            try {
+                cam.updateFrame();
+            } catch (Exception e){
+                throw e;
+            }
             fps++;
             if((startTime + 1000) < System.currentTimeMillis()){
                 System.out.println("FPS: " + fps + "\t Time: " + (System.currentTimeMillis() - startTime));

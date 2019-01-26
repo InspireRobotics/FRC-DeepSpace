@@ -5,9 +5,9 @@ import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.hardware.HardwareThread;
 import frc.robot.hardware.PixyCam;
+import frc.robot.subsystems.AlignCommand;
 import frc.robot.subsystems.DefaultDriveCommand;
 import frc.robot.subsystems.Drivetrain;
-import frc.robot.subsystems.FollowCommand;
 
 public class Robot extends TimedRobot {
 
@@ -53,7 +53,7 @@ public class Robot extends TimedRobot {
         System.out.println("Running Auto!");
 
         Scheduler.getInstance().removeAll();
-        Scheduler.getInstance().add(new FollowCommand(drivetrain, pixyCam, 1));
+        Scheduler.getInstance().add(new AlignCommand(drivetrain, pixyCam, 1));
     }
 
     @Override
