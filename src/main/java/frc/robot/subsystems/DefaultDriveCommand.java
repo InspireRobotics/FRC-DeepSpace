@@ -5,36 +5,35 @@ import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.HardwareMap;
 
 public class DefaultDriveCommand extends Command {
+    
+    //Base power multiplier
+    public static final double USER_POWER = 1.0;
 
-    public static final double USER_POWER = 0.8;
-    public double currentLeft = 0.0;
-    public double currentRight = 0.0;
-
+    //Gets joystick and drivetrain references
     private final Joystick drive = HardwareMap.Joysticks.drive;
     private final Drivetrain drivetrain;
 
+    //Constructor
     public DefaultDriveCommand(Drivetrain drivetrain) {
-        super("Default Drive");
+        //Saves drivetrain reference
         this.drivetrain = drivetrain;
 
+        //Requires drivetrain for functionality
         requires(drivetrain);
     }
 
+    //Allows drivetrain to drive
     @Override
     protected void execute() {
+        //Gets joystick positions
         double left = -drive.getRawAxis(HardwareMap.Joysticks.LEFT_Y_AXIS)*USER_POWER;
         double right = -drive.getRawAxis(HardwareMap.Joysticks.RIGHT_Y_AXIS)*USER_POWER;
 
-        currentLeft = weightedAverage(left, currentLeft);
-        currentRight = weightedAverage(right, currentRight);
-
-        drivetrain.drive(currentLeft, currentRight);
+        //Drives drivetrain
+        drivetrain.drive(left, right);
     }
 
-    private double weightedAverage(double newVal, double oldVal) {
-        return (oldVal * 9 + newVal) / 10;
-    }
-
+    //Is never finished (must be canceled)
     @Override
     protected boolean isFinished() {
         return false;

@@ -19,10 +19,11 @@ public class Robot extends TimedRobot {
     public void robotInit() {
         System.out.println("Robot init!");
 
-        //CameraServer.getInstance().startAutomaticCapture().setFPS(60);
+//        CameraServer.getInstance().startAutomaticCapture().setFPS(60);
 
         drivetrain = new Drivetrain();
-        drivetrain.updateDashboard();
+
+        //new JoystickButton(HardwareMap.Joysticks.drive, HardwareMap.Joysticks.A_BUTTON).whenPressed(new AlignCommand(drivetrain, pixyCam, 1));
 
         SmartDashboard.putData("Drivetrain", drivetrain);
         pixyCam = new PixyCam();
@@ -33,20 +34,19 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         pixyCam.updateDashboard();
-        drivetrain.updateDashboard();
 
         SmartDashboard.putBoolean("Hardware Thread", hardwareThread.isAlive());
     }
+    
 
     @Override
     public void disabledInit() {
+        drivetrain.Stop();
         System.out.println("Robot disabled!");
     }
 
     @Override
-    public void disabledPeriodic() {
-
-    }
+    public void disabledPeriodic() { }
 
     @Override
     public void autonomousInit() {
@@ -79,7 +79,7 @@ public class Robot extends TimedRobot {
     }
 
     public Drivetrain getDrivetrain() {
-        return drivetrain;
+        return this.drivetrain;
     }
 
     public PixyCam getPixyCam() {

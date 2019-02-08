@@ -1,65 +1,138 @@
 package frc.robot.subsystems;
 
-import com.kauailabs.navx.frc.AHRS;
-import edu.wpi.first.wpilibj.I2C;
-import edu.wpi.first.wpilibj.PowerDistributionPanel;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel;
 import edu.wpi.first.wpilibj.Spark;
-import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.command.Subsystem;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.HardwareMap;
 
 public class Drivetrain extends Subsystem {
+        
+        boolean fallback = true; //Are we using old motors?
 
-    private final AHRS gyro;
-    private final DifferentialDrive drive;
-    private PowerDistributionPanel pdp = new PowerDistributionPanel();
+        //Motor object storage
+        private CANSparkMax leftFront;
+        private CANSparkMax leftBack;
 
-    public Drivetrain() {
-        drive = createDrivetrain();
-        drive.setSafetyEnabled(false);
-        gyro = new AHRS(I2C.Port.kMXP);
-        gyro.enableLogging(true);
+        private CANSparkMax rightFront;
+        private CANSparkMax rightBack;
+        
+//        private CANEncoder left;
+//        private CANEncoder right;
 
-        gyro.reset();
+        //private PowerDistributionPanel pdp = new PowerDistributionPanel();
+        
+        //f for fallback, old motor object storage
+        private Spark fLeftFront;
+        private Spark fLeftBack;
+        
+        private Spark fRightFront;
+        private Spark fRightBack;
 
-        SmartDashboard.putData("Drive", drive);
-    }
+        
+        public Drivetrain() {
+                //Initializes based on if it is in fallback mode or not
+                if (!fallback) {
+                        leftFront = new CANSparkMax(HardwareMap.CAN.LEFT_FRONT_DRIVE, CANSparkMaxLowLevel.MotorType.kBrushless);
+                        leftBack = new CANSparkMax(HardwareMap.CAN.LEFT_BACK_DRIVE, CANSparkMaxLowLevel.MotorType.kBrushless);
+        
+                        leftFront.setRampRate(0.5);
+        
+                        leftBack.setInverted(true);
+        
+                        leftBack.follow(leftFront);
+        
+                        rightFront = new CANSparkMax(HardwareMap.CAN.RIGHT_FRONT_DRIVE, CANSparkMaxLowLevel.MotorType.kBrushless);
+                        rightBack = new CANSparkMax(HardwareMap.CAN.RIGHT_BACK_DRIVE, CANSparkMaxLowLevel.MotorType.kBrushless);
+        
+                        rightFront.setRampRate(0.5);
+        
+                        rightFront.setInverted(true);
+        
+                        rightBack.follow(rightFront);
 
-    private DifferentialDrive createDrivetrain() {
-        Spark leftFront = new Spark(HardwareMap.PWM.LEFT_FRONT_DRIVE);
-        Spark leftBack = new Spark(HardwareMap.PWM.LEFT_BACK_DRIVE);
-        Spark rightFront = new Spark(HardwareMap.PWM.RIGHT_FRONT_DRIVE);
-        Spark rightBack = new Spark(HardwareMap.PWM.RIGHT_BACK_DRIVE);
-
-        SpeedControllerGroup left = new SpeedControllerGroup(leftFront, leftBack);
-        SpeedControllerGroup right = new SpeedControllerGroup(rightFront, rightBack);
-
-        return new DifferentialDrive(left, right);
-    }
-
-    public void updateDashboard() {
-        SmartDashboard.putNumber("Gyro", getHeading());
-    }
-
-    public double getHeading() {
-        return gyro.getAngle();
-    }
-
-    public void drive(double left, double right) {
-        if (Math.abs(left) < .2) {
-            left = 0;
+//                left = new CANEncoder(leftFront);
+//                right = new CANEncoder(rightFront);
+                } else {
+                        
+                        fLeftFront = new Spark(HardwareMap.PWM.LEFT_FRONT_DRIVE);
+                        fLeftBack = new Spark(HardwareMap.PWM.LEFT_BACK_DRIVE);
+        
+                        fRightFront = new Spark(HardwareMap.PWM.RIGHT_FRONT_DRIVE);
+                        fRightBack = new Spark(HardwareMap.PWM.RIGHT_BACK_DRIVE);
+                        
+                }
         }
 
-        if (Math.abs(right) < .2) {
-            right = 0;
-        }
-        drive.tankDrive(left, right);
-    }
+        //Drives drivetrain, by sending commands to individual motors
+        public void drive(double left, double right){
+                //Limits deadzones to prevent burning out the motors
+                if (Math.abs(left) < 0.2) {
+                        left = 0;
+                }
+                if (Math.abs(right) < 0.2) {
+                        right = 0;
+                }
+                
+                //A possible solution to a weak battery (for consistency)
+                //double diff = 12 / Math.min(12, pdp.getVoltage());
+                
+                //If not in fallback mode...else...
+                if (!fallback) {
+                        //...drive new motors
+                        leftFront.set(left);
+                        rightFront.set(right);
+                } else {
+                        //...drive old motors (right side manually inverted)
+                        fLeftFront.set(left);
+                        fLeftBack.set(left);
+                        
+                        fRightFront.set(-right);
+                        fRightBack.set(-right);
+                }
 
-    @Override
-    protected void initDefaultCommand() {
-        setDefaultCommand(new DefaultDriveCommand(this));
-    }
+                //System.out.println(String.format("Left: %f, Right: %f", left, right));
+        }
+        
+        //Stops all motors in the drivetrain
+        public void Stop() {
+                //If not in fallback mode...else...
+                if (!fallback) {
+                        //...stop new motors
+                        leftFront.stopMotor();
+                        rightFront.stopMotor();
+                } else {
+                        //...stop old motors
+                        fLeftFront.stopMotor();
+                        fLeftBack.stopMotor();
+        
+                        fRightFront.stopMotor();
+                        fRightBack.stopMotor();
+                }
+        }
+//        public void DriveDistance(FeetInches distance){
+//                double leftStart = left.getPosition() * WHEEL_DIAMETER.getInchesWhole() * Math.PI;
+//                double rightStart = right.getPosition() * WHEEL_DIAMETER.getInchesWhole() * Math.PI;
+//
+//                double leftTarget = leftStart + distance.getInchesWhole();
+//                double rightTarget = rightStart + distance.getInchesWhole();
+//
+//                double leftDiff = leftTarget - leftStart;
+//                double rightDiff = rightTarget - rightStart;
+//
+//                while (Math.abs(leftStart - leftTarget) > 1 && Math.abs(rightStart - rightTarget) > 1){
+//                        leftDiff = leftTarget - left.getPosition() * WHEEL_DIAMETER.getInchesWhole() * Math.PI;
+//                        rightDiff = rightTarget - right.getPosition() * WHEEL_DIAMETER.getInchesWhole() * Math.PI;
+//
+//                        double diff = (leftDiff - rightDiff)/10;
+//
+//                        leftFront.set(0.75 - diff);
+//                        rightFront.set(0.75 + diff);
+//                }
+
+        //Sets default drive command
+        @Override
+        protected void initDefaultCommand() {
+                setDefaultCommand(new DefaultDriveCommand(this));
+        }
 }

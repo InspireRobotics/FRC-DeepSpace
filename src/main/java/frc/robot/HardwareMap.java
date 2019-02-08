@@ -12,10 +12,10 @@ public class HardwareMap {
         public static final int RIGHT_BACK_DRIVE = 3;
     }
     public static class CAN {
-        public static final int LEFT_FRONT_DRIVE = -1;
-        public static final int LEFT_BACK_DRIVE = -1;
-        public static final int RIGHT_FRONT_DRIVE = -1;
-        public static final int RIGHT_BACK_DRIVE = -1;
+        public static final int LEFT_FRONT_DRIVE = 7;
+        public static final int LEFT_BACK_DRIVE = 8;
+        public static final int RIGHT_FRONT_DRIVE = 5;
+        public static final int RIGHT_BACK_DRIVE = 6;
     }
     public static class Joysticks{
         public static final Joystick drive = new Joystick(0);

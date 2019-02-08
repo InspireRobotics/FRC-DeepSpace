@@ -2,10 +2,12 @@ package frc.robot.subsystems;
 
 public class FeetInches {
 
+    //Data varibles
     private int feet;
     private double inchesWhole;
     private double inchesPart;
 
+    //Two constructors; one for feet & inches, one for just inches
     public FeetInches(int feet, double inches){
         this.feet = (int) feet;
         this.inchesPart = inches;
@@ -17,6 +19,7 @@ public class FeetInches {
         this.inchesPart = inches % 12;
     }
 
+    //Getters
     public int getFeet() {
         return feet;
     }
