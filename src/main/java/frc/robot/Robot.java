@@ -5,8 +5,9 @@ import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.hardware.HardwareThread;
 import frc.robot.hardware.PixyCam;
-import frc.robot.subsystems.AlignCommand;
-import frc.robot.subsystems.DefaultDriveCommand;
+import frc.robot.commands.AlignCommand;
+import frc.robot.commands.DefaultDriveCommand;
+import frc.robot.hardware.Camera;
 import frc.robot.subsystems.Drivetrain;
 
 public class Robot extends TimedRobot {
@@ -14,12 +15,13 @@ public class Robot extends TimedRobot {
     private Thread hardwareThread;
     private Drivetrain drivetrain;
     private PixyCam pixyCam;
+    private Thread cameraThread;
 
     @Override
     public void robotInit() {
         System.out.println("Robot init!");
 
-//        CameraServer.getInstance().startAutomaticCapture().setFPS(60);
+        cameraThread = Camera.create();
 
         drivetrain = new Drivetrain();
 

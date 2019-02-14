@@ -36,7 +36,7 @@ public class HardwareThread implements Runnable {
             //FPS counter
             fps++;
             if((startTime + 1000) < System.currentTimeMillis()){
-                System.out.println("FPS: " + fps + "\t Time: " + (System.currentTimeMillis() - startTime));
+                System.out.println("Pixy FPS: " + fps + "\t Time: " + (System.currentTimeMillis() - startTime));
                 fps = 0;
                 startTime = System.currentTimeMillis();
             }

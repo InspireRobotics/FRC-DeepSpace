@@ -1,14 +1,18 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.robot.HardwareMap;
+import frc.robot.commands.DefaultDriveCommand;
+
+import static frc.robot.HardwareMap.Measurements.WHEEL_DIAMETER;
 
 public class Drivetrain extends Subsystem {
         
-        boolean fallback = true; //Are we using old motors?
+        boolean fallback = false; //Are we using old motors?
 
         //Motor object storage
         private CANSparkMax leftFront;
@@ -17,8 +21,8 @@ public class Drivetrain extends Subsystem {
         private CANSparkMax rightFront;
         private CANSparkMax rightBack;
         
-//        private CANEncoder left;
-//        private CANEncoder right;
+        private CANEncoder left;
+        private CANEncoder right;
 
         //private PowerDistributionPanel pdp = new PowerDistributionPanel();
         
@@ -31,12 +35,13 @@ public class Drivetrain extends Subsystem {
 
         
         public Drivetrain() {
+                
                 //Initializes based on if it is in fallback mode or not
                 if (!fallback) {
                         leftFront = new CANSparkMax(HardwareMap.CAN.LEFT_FRONT_DRIVE, CANSparkMaxLowLevel.MotorType.kBrushless);
                         leftBack = new CANSparkMax(HardwareMap.CAN.LEFT_BACK_DRIVE, CANSparkMaxLowLevel.MotorType.kBrushless);
         
-                        leftFront.setRampRate(0.5);
+                        leftFront.setRampRate(1);
         
                         leftBack.setInverted(true);
         
@@ -45,14 +50,15 @@ public class Drivetrain extends Subsystem {
                         rightFront = new CANSparkMax(HardwareMap.CAN.RIGHT_FRONT_DRIVE, CANSparkMaxLowLevel.MotorType.kBrushless);
                         rightBack = new CANSparkMax(HardwareMap.CAN.RIGHT_BACK_DRIVE, CANSparkMaxLowLevel.MotorType.kBrushless);
         
-                        rightFront.setRampRate(0.5);
+                        rightFront.setRampRate(1);
         
                         rightFront.setInverted(true);
         
                         rightBack.follow(rightFront);
-
-//                left = new CANEncoder(leftFront);
-//                right = new CANEncoder(rightFront);
+        
+                        left = new CANEncoder(leftFront);
+                        right = new CANEncoder(rightFront);
+                        
                 } else {
                         
                         fLeftFront = new Spark(HardwareMap.PWM.LEFT_FRONT_DRIVE);
@@ -110,26 +116,30 @@ public class Drivetrain extends Subsystem {
                         fRightBack.stopMotor();
                 }
         }
-//        public void DriveDistance(FeetInches distance){
-//                double leftStart = left.getPosition() * WHEEL_DIAMETER.getInchesWhole() * Math.PI;
-//                double rightStart = right.getPosition() * WHEEL_DIAMETER.getInchesWhole() * Math.PI;
-//
-//                double leftTarget = leftStart + distance.getInchesWhole();
-//                double rightTarget = rightStart + distance.getInchesWhole();
-//
-//                double leftDiff = leftTarget - leftStart;
-//                double rightDiff = rightTarget - rightStart;
-//
-//                while (Math.abs(leftStart - leftTarget) > 1 && Math.abs(rightStart - rightTarget) > 1){
-//                        leftDiff = leftTarget - left.getPosition() * WHEEL_DIAMETER.getInchesWhole() * Math.PI;
-//                        rightDiff = rightTarget - right.getPosition() * WHEEL_DIAMETER.getInchesWhole() * Math.PI;
-//
-//                        double diff = (leftDiff - rightDiff)/10;
-//
-//                        leftFront.set(0.75 - diff);
-//                        rightFront.set(0.75 + diff);
-//                }
-
+        public void DriveDistance(FeetInches distance) {
+                if (!fallback) {
+                        double leftStart = left.getPosition() * WHEEL_DIAMETER.getInchesWhole() * Math.PI;
+                        double rightStart = right.getPosition() * WHEEL_DIAMETER.getInchesWhole() * Math.PI;
+        
+                        double leftTarget = leftStart + distance.getInchesWhole();
+                        double rightTarget = rightStart + distance.getInchesWhole();
+        
+                        double leftDiff = leftTarget - leftStart;
+                        double rightDiff = rightTarget - rightStart;
+        
+                        while (Math.abs(leftStart - leftTarget) > 1 && Math.abs(rightStart - rightTarget) > 1) {
+                                leftDiff = leftTarget - left.getPosition() * WHEEL_DIAMETER.getInchesWhole() * Math.PI;
+                                rightDiff = rightTarget - right.getPosition() * WHEEL_DIAMETER.getInchesWhole() * Math.PI;
+                
+                                double diff = (leftDiff - rightDiff) / 10;
+                
+                                leftFront.set(0.75 - diff);
+                                rightFront.set(0.75 + diff);
+                        }
+                } else {
+                        throw new Error("This method is unavailable on older/incompatible drivetrains");
+                }
+        }
         //Sets default drive command
         @Override
         protected void initDefaultCommand() {
