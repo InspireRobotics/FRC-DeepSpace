@@ -9,7 +9,7 @@ public class FeetInches {
 
     //Two constructors; one for feet & inches, one for just inches
     public FeetInches(int feet, double inches){
-        this.feet = (int) feet;
+        this.feet = feet;
         this.inchesPart = inches;
         this.inchesWhole = inches + feet * 12;
     }

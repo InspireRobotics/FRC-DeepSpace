@@ -29,6 +29,12 @@ public class HardwareMap {
         public static final int X_BUTTON = 3;
         public static final int Y_BUTTON = 4;
     }
+    
+    public static class Pnuematic{
+        public static final int[] singleList = new int[]{};
+        public static final int[][] doubleList = new int[][]{{0, 3}, {4, 7}};
+        public static final int compresserId = 0;
+    }
 
     public static class Sensors{
         public static final int PIXY_CAM = 54;
@@ -38,5 +44,6 @@ public class HardwareMap {
         public static final FeetInches MARKER_DIST_TARGET = new FeetInches(11.25);
         public static final FeetInches WHEEL_DIAMETER = new FeetInches(8);
     }
-
+    
+    
 }

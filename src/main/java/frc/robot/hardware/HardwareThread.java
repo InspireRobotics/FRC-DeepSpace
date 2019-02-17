@@ -27,7 +27,7 @@ public class HardwareThread implements Runnable {
         int fps = 0;
         
         while(!Thread.interrupted()){
-            //Attempet to do Pixy stuff
+            //Attempt to do Pixy stuff
             try {
                 cam.updateFrame();
             } catch (Exception e){

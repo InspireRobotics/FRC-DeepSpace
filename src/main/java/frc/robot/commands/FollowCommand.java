@@ -33,7 +33,7 @@ public class FollowCommand extends Command {
         updateShape();
         
         //Sets up temporary drive calculation
-        double leftPower = 0, rightPower = 0;
+        double leftPower, rightPower;
 
         //if the shape is non-null...else...
         if (shape != null) {
@@ -68,7 +68,7 @@ public class FollowCommand extends Command {
     }
     
     //Gets shapes
-    public void updateShape(){
+    private void updateShape(){
         //Temporary shape storage
         Shape tempShape = null;
         for (int i = 0; i < pixyCam.getShapes().size(); i++) {

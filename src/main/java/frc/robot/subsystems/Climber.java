@@ -1,22 +1,18 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.Relay;
+import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
 public class Climber extends Subsystem {
 	
-	private Relay climbMotor;
+	private Spark climbMotor;
 	
 	public Climber(int channel){
-		climbMotor = new Relay(channel);
+		climbMotor = new Spark(channel);
 	}
 	
-	public void extend(){
-		climbMotor.set(Relay.Value.kForward);
-	}
-	
-	public void retract(){
-		climbMotor.set(Relay.Value.kReverse);
+	public void setSpeed(double speed){
+		climbMotor.set(speed);
 	}
 	
 	@Override

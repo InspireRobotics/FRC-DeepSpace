@@ -6,6 +6,8 @@ import frc.robot.hardware.PixyCam;
 import frc.robot.hardware.Shape;
 import frc.robot.subsystems.Drivetrain;
 
+import java.util.ArrayList;
+
 //        Pixy Camera Lens FOV:
 //        75 degrees horizontal, 47 degrees vertical
 
@@ -15,8 +17,8 @@ public class TargetCommand extends Command {
 
     private static final double MARGIN_VIEW = 5.0;
 
-    private static Drivetrain drivetrain;
-    private static PixyCam pixyCam;
+    private final Drivetrain drivetrain;
+    private final PixyCam pixyCam;
     private int id;
     private long startFinishTime = -1;
     private double centerX = -100;
@@ -33,30 +35,31 @@ public class TargetCommand extends Command {
     protected void execute() {
         Shape[] markers = new Shape[2];
         byte markerCount = 0;
-        for (var i = 0; i < this.pixyCam.getShapes().size(); i++){
-            if (this.pixyCam.getShapes().get(i).getId() == id){
-                markers[markerCount] = this.pixyCam.getShapes().get(i);
+        ArrayList<Shape> temp = pixyCam.getShapes();
+        for (var i = 0; i < temp.size(); i++){
+            if (temp.get(i).getId() == id){
+                markers[markerCount] = temp.get(i);
                 markerCount++;
                 if (markerCount >= 2){
-                    i = this.pixyCam.getShapes().size();
+                    i = temp.size();
                 }
             }
         }
         if (markerCount == 2){
             try {
-                centerX = (markers[0].getX() + markers[1].getX()) / 2;
+                centerX = ((float) (markers[0].getX() + markers[1].getX())) / 2;
             } catch (Exception e){
                 centerX = 160;
             }
             double diff = 160 - centerX;
             SmartDashboard.putNumber("Difference from center:", diff);
-            double drive = 0.54;
+            double drive = 0.2;
             if (diff < 0)
                 drive *= -1;
-            double power = Math.min(Math.max(drive + diff/200, -0.64), 0.64);
+            double power = Math.min(Math.max(drive + diff/200, -0.5), 0.5);
             drivetrain.drive(-power, power);
         } else if (startFinishTime == -1){
-            drivetrain.drive(0.64, -0.64);
+            drivetrain.drive(0.3, -0.3);
         }
     }
 

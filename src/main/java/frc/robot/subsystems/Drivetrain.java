@@ -1,8 +1,10 @@
 package frc.robot.subsystems;
 
+import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.robot.HardwareMap;
@@ -12,7 +14,7 @@ import static frc.robot.HardwareMap.Measurements.WHEEL_DIAMETER;
 
 public class Drivetrain extends Subsystem {
         
-        boolean fallback = false; //Are we using old motors?
+        private boolean fallback = false; //Are we using old motors?
 
         //Motor object storage
         private CANSparkMax leftFront;
@@ -32,16 +34,20 @@ public class Drivetrain extends Subsystem {
         
         private Spark fRightFront;
         private Spark fRightBack;
+        
+        private final AHRS gyro;
 
         
         public Drivetrain() {
+                
+                gyro = new AHRS(SPI.Port.kMXP);
                 
                 //Initializes based on if it is in fallback mode or not
                 if (!fallback) {
                         leftFront = new CANSparkMax(HardwareMap.CAN.LEFT_FRONT_DRIVE, CANSparkMaxLowLevel.MotorType.kBrushless);
                         leftBack = new CANSparkMax(HardwareMap.CAN.LEFT_BACK_DRIVE, CANSparkMaxLowLevel.MotorType.kBrushless);
         
-                        leftFront.setRampRate(1);
+                        leftFront.setRampRate(1.5);
         
                         leftBack.setInverted(true);
         
@@ -50,9 +56,9 @@ public class Drivetrain extends Subsystem {
                         rightFront = new CANSparkMax(HardwareMap.CAN.RIGHT_FRONT_DRIVE, CANSparkMaxLowLevel.MotorType.kBrushless);
                         rightBack = new CANSparkMax(HardwareMap.CAN.RIGHT_BACK_DRIVE, CANSparkMaxLowLevel.MotorType.kBrushless);
         
-                        rightFront.setRampRate(1);
+                        rightFront.setRampRate(1.5);
         
-                        rightFront.setInverted(true);
+                        rightBack.setInverted(true);
         
                         rightBack.follow(rightFront);
         
@@ -100,6 +106,11 @@ public class Drivetrain extends Subsystem {
                 //System.out.println(String.format("Left: %f, Right: %f", left, right));
         }
         
+        //Gets gyro heading
+        public double getHeading(){
+                return gyro.getAngle();
+        }
+        
         //Stops all motors in the drivetrain
         public void Stop() {
                 //If not in fallback mode...else...
@@ -116,6 +127,7 @@ public class Drivetrain extends Subsystem {
                         fRightBack.stopMotor();
                 }
         }
+        
         public void DriveDistance(FeetInches distance) {
                 if (!fallback) {
                         double leftStart = left.getPosition() * WHEEL_DIAMETER.getInchesWhole() * Math.PI;

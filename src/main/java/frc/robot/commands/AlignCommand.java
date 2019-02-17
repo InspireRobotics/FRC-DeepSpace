@@ -10,12 +10,12 @@ import java.util.ArrayList;
 
 public class AlignCommand extends Command {
 
-    private final long LAG_LIMIT = 0; //ms. Change if you often get gaps between detection periods
+    private final long LAG_LIMIT = 0; //ms...Change if you often get gaps between detection periods
     private final int CAM_CENTER = 160; //Center of Pixycam gen 1 screen
-    private final long FINISH_LIMIT = 100; //ms
-    private final double BASE_SPEED = 0.4; //ONLY CHANGE THIS IF YOU KNOW YOUR ROBOT CAN HANDLE IT
-    private final double TURN_LIMIT = 0.4; //Power at which the robot begins to turn in place
-    private final double BACKUP_LIMIT = 0.6;
+    private final long FINISH_LIMIT = 50; //ms...change if robot needs more of less conformation time
+    private final double BASE_SPEED = 0.4; //Percent...ONLY CHANGE THIS IF YOU KNOW YOUR ROBOT CAN HANDLE IT
+    private final double TURN_LIMIT = 0.4; //Percent...Power at which the robot begins to turn in place
+    private final double BACKUP_LIMIT = 0.6; //Percent...Power level at which the robot backs up
     private final double ASPECT_RATIO = 1.5; //Height over Width
 
     private Drivetrain drivetrain; //Storage for drivetrain object
@@ -23,7 +23,7 @@ public class AlignCommand extends Command {
     private int id; //Storage for target shape ID
     private long lagTime = 0; //Storage for pixycam lagtime
     private long finishTime = -1; //Time in which he robot is in a finished state
-    private Shape[] storedShapes = new Shape[2]; //Shapes temporaially stored for the "isFinished" function
+    private Shape[] storedShapes = new Shape[2]; //Shapes temporarily stored for the "isFinished" function
 
 
 
@@ -42,6 +42,7 @@ public class AlignCommand extends Command {
     
         Shape[] shapes = new Shape[2];
         int shapeCount = 0;
+        
         for (var i = 0; i < temp.size(); i++){
             if (temp.get(i).getId() == id){
                 shapes[shapeCount] = temp.get(i).copy();
@@ -67,17 +68,19 @@ public class AlignCommand extends Command {
         //if valid...else
         if (shapeCount == 2 && finishTime == -1){
             try {
+                //Reset lag time
                 lagTime = -1;
+                //Get drive power
                 double[] drive = getDrive(storedShapes[0], storedShapes[1]);
-                //System.out.println("[" + drive[0] + ",\n" + drive[1] + "]");
+                //Drive drivetrain
                 drivetrain.drive(drive[0], drive[1]);
             } catch (Exception e){
                 System.out.println("Dropped frame");
             }
         } else {
             //if within lag params...else
-            if (lagTime == -1 && LAG_LIMIT != 0) {
-                //Begin lag timner
+            if (lagTime == -1) {
+                //Begin lag timer
                 lagTime = System.currentTimeMillis();
             } else if (lagTime + LAG_LIMIT < System.currentTimeMillis()){
                 //Stop drivetrain

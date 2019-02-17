@@ -5,32 +5,32 @@ import edu.wpi.cscore.CvSource;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.cameraserver.CameraServer;
 import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
 
 public class Camera implements Runnable {
 	
-	private CameraServer cameraServer;
-	private UsbCamera camera;
-	private CvSink cvSink;
-	private CvSource outputStream;
-	private Mat source;
-	private Mat output;
+	//A ton of processing variables
+	private UsbCamera camera; //Camera object
+	private CvSink cvSink; //Data sink
+	private CvSource outputStream; //Output port
+	private Mat source; //Data holder
+	private Mat output; //Data holder
 	
-	
+	//Constructor
 	public Camera(){
-		cameraServer = CameraServer.getInstance();
-		camera = cameraServer.startAutomaticCapture();
+		//Gets camera object
+		camera = CameraServer.getInstance().startAutomaticCapture();
 		
-		camera.setFPS(50);
-		camera.setResolution(640, 480);
+		//Link data sink and output stream with appropriate references
+		cvSink = CameraServer.getInstance().getVideo();
+		outputStream = CameraServer.getInstance().putVideo("Blur", 320, 240);
+		outputStream.setFPS(50);
 		
-		cvSink = cameraServer.getVideo();
-		outputStream = cameraServer.putVideo("blur", 640, 480);
-		
+		//Setup two data-holding variables
 		source = new Mat();
 		output = new Mat();
 	}
 	
+	//Basic thread stuff
 	public static Thread create(){
 		Thread thread = new Thread(new Camera(), "Stream Camera Thread");
 		thread.start();
@@ -38,22 +38,9 @@ public class Camera implements Runnable {
 		return thread;
 	}
 	
+	//Main run loop
 	@Override
 	public void run() {
-		long frameStart = System.currentTimeMillis();
-		int FPS = 0;
-		while (!Thread.interrupted()){
-			cvSink.grabFrame(source);
-			
-			Imgproc.cvtColor(source, output, Imgproc.COLOR_BayerGR2RGB);
-			
-			outputStream.putFrame(output);
-			FPS++;
-			if (frameStart + 1000 < System.currentTimeMillis()){
-				System.out.println("Microsoft FPS: " + FPS + " Time: " + (System.currentTimeMillis() - frameStart));
-				FPS = 0;
-				frameStart = System.currentTimeMillis();
-			}
-		}
+		//TODO: FIX IMAGE PROCESSING
 	}
 }

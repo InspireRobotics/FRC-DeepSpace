@@ -137,11 +137,11 @@ public class PixyCam {
     
     //Checks if synced (syncs if not)
     private boolean synced(int word) {
-        boolean sync = (word != PIXY_START_WORD_X);
-        if (!sync){
+        boolean unsync = (word == PIXY_START_WORD_X);
+        if (unsync){
             io.read(PIXY_CAM, 1, ByteBuffer.allocateDirect(1));
         }
-        return sync;
+        return !unsync;
     }
     
     //Updates the dashboard
