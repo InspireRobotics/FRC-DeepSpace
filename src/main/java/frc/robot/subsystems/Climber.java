@@ -5,14 +5,21 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 
 public class Climber extends Subsystem {
 	
-	private Spark climbMotor;
+	private final Spark climbWinch;
+	private final Spark[] climbAux;
 	
-	public Climber(int channel){
-		climbMotor = new Spark(channel);
+	public Climber(int winchChannel, int[] auxChannels){
+		climbWinch = new Spark(winchChannel);
+		climbAux = new Spark[]{new Spark(auxChannels[0]), new Spark(auxChannels[1])};
 	}
 	
-	public void setSpeed(double speed){
-		climbMotor.set(speed);
+	public void setWinchSpeed(double speed){
+		climbWinch.set(speed);
+		
+	}
+	public void setClampSpeed(double speed){
+		climbAux[0].set(speed);
+		climbAux[1].set(-speed);
 	}
 	
 	@Override

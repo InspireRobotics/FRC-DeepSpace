@@ -5,10 +5,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.commands.ClimbCommand;
-import frc.robot.commands.DefaultDriveCommand;
-import frc.robot.commands.DriveCommand;
-import frc.robot.commands.PnuematicDoubleCommand;
+import frc.robot.commands.*;
 import frc.robot.hardware.Camera;
 import frc.robot.hardware.Distance;
 import frc.robot.hardware.HardwareThread;
@@ -16,6 +13,7 @@ import frc.robot.hardware.PixyCam;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Pneumatics;
+import frc.robot.subsystems.Wedge;
 
 public class Robot extends TimedRobot {
 
@@ -24,6 +22,7 @@ public class Robot extends TimedRobot {
     private PixyCam pixyCam;
     private Thread cameraThread;
     private Pneumatics pneumatics;
+    private Wedge wedge;
     private Climber climber;
     private Distance distance;
 
@@ -37,7 +36,9 @@ public class Robot extends TimedRobot {
         
         pneumatics = new Pneumatics(HardwareMap.Pnuematic.singleList, HardwareMap.Pnuematic.doubleList, HardwareMap.Pnuematic.compresserId);
         
-        climber = new Climber(2);
+        wedge = new Wedge(2);
+        
+        climber = new Climber(1, new int[]{1,1});
         
         distance = new Distance(0);
         
@@ -49,9 +50,9 @@ public class Robot extends TimedRobot {
     
         new JoystickButton(HardwareMap.Joysticks.aux, HardwareMap.Joysticks.Y_BUTTON).whenPressed(new PnuematicDoubleCommand(pneumatics, DoubleSolenoid.Value.kForward, toExtendPanel));
         new JoystickButton(HardwareMap.Joysticks.aux, HardwareMap.Joysticks.B_BUTTON).whenPressed(new PnuematicDoubleCommand(pneumatics, DoubleSolenoid.Value.kReverse, toExtendPanel));
-        new JoystickButton(HardwareMap.Joysticks.aux, HardwareMap.Joysticks.A_BUTTON).whenPressed(new ClimbCommand(climber, 1.0, 1000));
-        new JoystickButton(HardwareMap.Joysticks.aux, HardwareMap.Joysticks.X_BUTTON).whenPressed(new ClimbCommand(climber, -1.0, 1000));
-    
+        new JoystickButton(HardwareMap.Joysticks.aux, HardwareMap.Joysticks.A_BUTTON).whenPressed(new WedgeCommand(wedge, 1.0, 1000));
+        new JoystickButton(HardwareMap.Joysticks.aux, HardwareMap.Joysticks.X_BUTTON).whenPressed(new WedgeCommand(wedge, -1.0, 1000));
+        
         SmartDashboard.putData("Drivetrain", drivetrain);
         pixyCam = new PixyCam();
 
@@ -59,6 +60,13 @@ public class Robot extends TimedRobot {
     
         new JoystickButton(HardwareMap.Joysticks.drive, HardwareMap.Joysticks.X_BUTTON).whenPressed(new DriveCommand(drivetrain, -0.4, 1000));
         new JoystickButton(HardwareMap.Joysticks.drive, HardwareMap.Joysticks.B_BUTTON).whenPressed(new DriveCommand(drivetrain, 0.4, 1000));
+        
+        
+        new JoystickButton(HardwareMap.Joysticks.drive, HardwareMap.Joysticks.LEFT_SHOULDER_BUTTON).whenPressed(new ClimbClampCommand(climber, -1,1000));
+        new JoystickButton(HardwareMap.Joysticks.drive, HardwareMap.Joysticks.RIGHT_SHOULDER_BUTTON).whenPressed(new ClimbClampCommand(climber, -1,1000));
+        new JoystickButton(HardwareMap.Joysticks.aux, HardwareMap.Joysticks.LEFT_SHOULDER_BUTTON).whenPressed(new ClimbClampCommand(climber, -1,1000));
+        new JoystickButton(HardwareMap.Joysticks.aux, HardwareMap.Joysticks.RIGHT_SHOULDER_BUTTON).whenPressed(new ClimbClampCommand(climber, -1,1000));
+    
     }
 
     @Override

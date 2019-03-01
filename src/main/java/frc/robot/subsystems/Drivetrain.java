@@ -106,6 +106,11 @@ public class Drivetrain extends Subsystem {
                 //System.out.println(String.format("Left: %f, Right: %f", left, right));
         }
         
+        //Gets averaged current position of wheels
+        public double wheelPos(){
+                return (left.getPosition() + right.getPosition())/2;
+        }
+        
         //Gets gyro heading
         public double getHeading(){
                 return gyro.getAngle();
