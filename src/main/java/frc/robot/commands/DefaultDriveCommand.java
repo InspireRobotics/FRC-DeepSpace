@@ -36,7 +36,7 @@ public class DefaultDriveCommand extends Command {
     protected void execute() {
         //Gets joystick positions
         double left = -drive.getRawAxis(HardwareMap.Joysticks.LEFT_Y_AXIS);
-        double right = -drive.getRawAxis(HardwareMap.Joysticks.RIGHT_Y_AXIS);
+        double right = -drive.getRawAxis(HardwareMap.Joysticks.RIGHT_X_AXIS);
         
         //Sets power to default "slow"
         double power = USER_POWER_SLOW;

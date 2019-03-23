@@ -6,7 +6,9 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Spark;
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import frc.robot.HardwareMap;
 import frc.robot.commands.DefaultDriveCommand;
 
@@ -25,6 +27,8 @@ public class Drivetrain extends Subsystem {
         
         private CANEncoder left;
         private CANEncoder right;
+        
+        private DifferentialDrive differentialDrive;
 
         //private PowerDistributionPanel pdp = new PowerDistributionPanel();
         
@@ -51,8 +55,6 @@ public class Drivetrain extends Subsystem {
         
                         leftBack.setInverted(true);
         
-                        leftBack.follow(leftFront);
-        
                         rightFront = new CANSparkMax(HardwareMap.CAN.RIGHT_FRONT_DRIVE, CANSparkMaxLowLevel.MotorType.kBrushless);
                         rightBack = new CANSparkMax(HardwareMap.CAN.RIGHT_BACK_DRIVE, CANSparkMaxLowLevel.MotorType.kBrushless);
         
@@ -60,10 +62,10 @@ public class Drivetrain extends Subsystem {
         
                         rightBack.setInverted(true);
         
-                        rightBack.follow(rightFront);
-        
                         left = new CANEncoder(leftFront);
                         right = new CANEncoder(rightFront);
+                        
+                        differentialDrive = new DifferentialDrive(new SpeedControllerGroup(leftFront, leftBack), new SpeedControllerGroup(rightFront, rightBack));
                         
                 } else {
                         
@@ -73,6 +75,7 @@ public class Drivetrain extends Subsystem {
                         fRightFront = new Spark(HardwareMap.PWM.RIGHT_FRONT_DRIVE);
                         fRightBack = new Spark(HardwareMap.PWM.RIGHT_BACK_DRIVE);
                         
+                        differentialDrive = new DifferentialDrive(new SpeedControllerGroup(fLeftFront, fLeftBack), new SpeedControllerGroup(fRightFront, fRightBack));
                 }
         }
 
@@ -90,18 +93,7 @@ public class Drivetrain extends Subsystem {
                 //double diff = 12 / Math.min(12, pdp.getVoltage());
                 
                 //If not in fallback mode...else...
-                if (!fallback) {
-                        //...drive new motors
-                        leftFront.set(left);
-                        rightFront.set(right);
-                } else {
-                        //...drive old motors (right side manually inverted)
-                        fLeftFront.set(left);
-                        fLeftBack.set(left);
-                        
-                        fRightFront.set(-right);
-                        fRightBack.set(-right);
-                }
+                differentialDrive.arcadeDrive(left, right);
 
                 //System.out.println(String.format("Left: %f, Right: %f", left, right));
         }

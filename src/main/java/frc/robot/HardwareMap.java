@@ -21,7 +21,9 @@ public class HardwareMap {
         public static final Joystick drive = new Joystick(0);
         public static final Joystick aux = new Joystick(1);
 
+        public static final int LEFT_X_AXIS = 0;
         public static final int LEFT_Y_AXIS = 1;
+        public static final int RIGHT_X_AXIS = 4;
         public static final int RIGHT_Y_AXIS = 5;
 
         public static final int A_BUTTON = 1;
